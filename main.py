@@ -47,7 +47,7 @@ class database:
     
     def add(self, key, data):
         ActiveDB = self.db_name
-        if ActiveDB == "None":
+        if ActiveDB == None:
             print("please load a database using the database.load() command.")
             return
         print(ActiveDB)
@@ -71,7 +71,7 @@ class database:
 
     def remove(self, key):
         ActiveDB = self.db_name
-        if ActiveDB == "None":
+        if ActiveDB == None:
             print("please load a database using the database.load() command.")
             return
         
@@ -94,9 +94,8 @@ class database:
                     print("there is no such key with this name")
                     return
 
-    ## Needs Debugging and Improvement
-    ## Noticed that it gives out full json upon query and cannot deal properly with Null Database
-    def search(self, key, database=None):
+    def search(self, key):
+        database = self.db_name
         if not database == None:
             ActiveDB = database
             if not os.path.isfile(f"./RegisteredDBs/{ActiveDB}.json"):
