@@ -2,6 +2,10 @@ import os
 import json
 import swift_exceptions as swift_exceptions
 
+#### TODO #######
+# Finish dot based multi notation on the rest of the code
+# add: push.
+
 class Database:
     def __init__(self):
         self.db_name = None
@@ -29,9 +33,7 @@ class Database:
                 print("[SwiftDB] | Database not created.")
                 return
         
-        print(f"./RegisteredDBs/{DBname}.json")
         isRegisteredAlready = os.path.isfile(f"./RegisteredDBs/{DBname}.json")
-        print(isRegisteredAlready)
 
         if isRegisteredAlready:
             ActiveDB = DBname
@@ -48,7 +50,6 @@ class Database:
         if ActiveDB == None:
             raise swift_exceptions.No_Loaded_Database()
         
-        print(ActiveDB)
         with open(f"./RegisteredDBs/{ActiveDB}.json", "r+") as add_info:
             information = json.load(add_info)
             add_info.seek(0)
@@ -60,7 +61,6 @@ class Database:
                 add_target = nested_keys.pop()
 
                 for key in nested_keys:
-                    print(key)
                     try:
                         target = target[key]
                     except:
@@ -80,7 +80,6 @@ class Database:
                     return
                 else:
                     add_info.seek(0)
-                    print(information)
                     information[key] = data
                     add_info.seek(0)
                     add_info.truncate()
@@ -129,7 +128,7 @@ class Database:
 
     def get(self, key):
         database = self.db_name
-        if not database == None:
+        if database is not None:
             ActiveDB = database
             if not os.path.isfile(f"./RegisteredDBs/{ActiveDB}.json"):
                 raise swift_exceptions.No_Loaded_Database()
@@ -137,26 +136,26 @@ class Database:
                 with open(f"./RegisteredDBs/{ActiveDB}.json", "r+") as search_function:
                     loaded_info = json.load(search_function)
                     search_function.seek(0)
-                    if key in loaded_info:
-                        search_result = loaded_info.get(key)
-                        return search_result
+                    if key.count(".") > 0:
+                        nested_keys = key.split(".")
+                        target_key = nested_keys.pop()
+                        for i in nested_keys:
+                            loaded_info = loaded_info[i]
+                        return loaded_info[target_key]
                     else:
-                        print("This key has not been found. Make sure to check Capitalization as it may help.")
-                        return
+                        with open(f"./RegisteredDBs/{ActiveDB}.json", "r+") as search_function:  
+                            loaded_info = json.load(search_function)
+                            search_function.seek(0)
+                            if key in loaded_info:
+                                search_result = loaded_info.get(key)
+                                return search_result
+                            else:
+                                raise swift_exceptions.Invalid_Key()
         else:
             ActiveDB = self.db_name
             if not os.path.isfile(f"./RegisteredDBs/{ActiveDB}.json"):
                 print("There is no database with such name. You can create one using database.load() command.")
                 return
-            else:
-                with open(f"./RegisteredDBs/{ActiveDB}.json", "r+") as search_function:  
-                    loaded_info = json.load(search_function)
-                    search_function.seek(0)
-                    if key in loaded_info:
-                        search_result = loaded_info.get(key)
-                        return search_result
-                    else:
-                        raise swift_exceptions.Invalid_Key()
 
     def update(self, key=None, data=None):
         database = self.db_name
